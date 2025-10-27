@@ -1,0 +1,72 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <title>Simple Media Player</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <style>
+    body { font-family: Arial, sans-serif; max-width: 900px; margin: 30px auto; padding: 20px; }
+    header { display:flex; justify-content:space-between; align-items:center; }
+    form { margin-bottom: 20px; }
+    .video-list { display:flex; flex-direction:column; gap:10px; }
+    .player { margin-top: 20px; }
+    video { width:100%; max-height:480px; background:#000; }
+    .file-row { display:flex; justify-content:space-between; align-items:center; padding:8px; border:1px solid #eee; border-radius:5px; }
+    .small { font-size:0.9rem; color:#555; }
+    button { padding:6px 10px; }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>Simple Media Player</h1>
+    <div class="small">Upload supported: mp4, webm, ogg, mov, mkv</div>
+  </header>
+
+  <section>
+    <form action="/upload" method="post" enctype="multipart/form-data">
+      <input type="file" name="file" accept="video/*" required />
+      <button type="submit">Upload</button>
+    </form>
+
+    <div>
+      <h3>Available Videos</h3>
+      <div class="video-list">
+        {% for f in files %}
+        <div class="file-row">
+          <div>{{ f }}</div>
+          <div>
+            <a href="#" onclick="playVideo('{{ f }}'); return false;">Play</a>
+            &nbsp;|&nbsp;
+            <form action="/delete/{{ f }}" method="post" style="display:inline;">
+              <button type="submit" onclick="return confirm('Delete file?');">Delete</button>
+            </form>
+          </div>
+        </div>
+        {% else %}
+        <div class="small">No videos uploaded yet.</div>
+        {% endfor %}
+      </div>
+    </div>
+
+    <div class="player">
+      <h3>Player</h3>
+      <video id="player" controls preload="metadata">
+        <source id="playerSource" src="" type="video/mp4">
+        Your browser doesn't support the video tag.
+      </video>
+    </div>
+  </section>
+
+  <script>
+    function playVideo(name) {
+      const player = document.getElementById('player');
+      const source = document.getElementById('playerSource');
+      // Use encoded URI component for safe paths
+      source.src = '/video/' + encodeURIComponent(name);
+      player.load();
+      player.play().catch(e => console.log('play error', e));
+      window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' });
+    }
+  </script>
+</body>
+</html>
